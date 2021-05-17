@@ -48,6 +48,16 @@ Vue.component('testcase-form',{
             testcaseApi.save({},testcase).then(result =>
             result.json().then(data=>{
                 this.testcases.push(data);
+                this.author = '';
+                this.update_date = "2021-01-01";
+                this.creation_date= "2021-01-01";
+                this.case_name = '';
+                this.step = '';
+                this.input_data = '';
+                this.result = '';
+                this.chain_id = 0;
+                this.testplan_id = 0;
+                this.element_id = 0
                 })
             )
         }
