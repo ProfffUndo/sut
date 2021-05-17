@@ -3,56 +3,56 @@ Create schema "public";
 
 CREATE TABLE IF NOT EXISTS tsystem --Система
 ( 
-	system_info_id		serial, --id информации о системе
-	system_description	character varying(250), --описание системы
-	system_code		character varying(50) not null unique, --код системы
-	system_short_name	character varying(50) not null, --краткое название
-	PRIMARY KEY (system_info_id) 
+	id		serial, --id информации о системе
+	description	character varying(250), --описание системы
+	code		character varying(50) not null unique, --код системы
+	name	character varying(50) not null, --краткое название
+	PRIMARY KEY (id) 
 );
 
 CREATE TABLE IF NOT EXISTS trelease --Релиз
 ( 
-	release_id		serial, --id релиза
+	id			serial, --id релиза
 	system_info_id		integer not null, --id информации о системе
 	release_version		character varying(50) not null, --версия
 	release_date		date not null, --дата ввода в действие
 	release_estimated_date	date not null, --плановая дата
 	release_description	character varying(250), --описание релиза
-	PRIMARY KEY (release_id),
-	FOREIGN KEY (system_info_id) REFERENCES tsystem (system_info_id)
+	PRIMARY KEY (id),
+	FOREIGN KEY (system_info_id) REFERENCES tsystem (id)
 	ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS ttestplan --Тест-план
 ( 
-	testplan_id		serial, --id тест-плана
-	testplan_author		character varying(50) not null, --автор
-	testplan_update_date	date not null, --дата последнего изменения
-	testplan_creation_date	date not null, --дата создания
+	id		serial, --id тест-плана
+	author		character varying(50) not null, --автор
+	update_date	date not null, --дата последнего изменения
+	creation_date	date not null, --дата создания
 	release_id		integer not null, --id релиза
-	PRIMARY KEY (testplan_id),
-	FOREIGN KEY (release_id) REFERENCES trelease (release_id)
+	PRIMARY KEY (id),
+	FOREIGN KEY (release_id) REFERENCES trelease (id)
 	ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS tcl_element --Элемент тестирования
 ( 
-	element_id		serial, --id элемента тестирования
+	id			serial, --id элемента тестирования
 	element_name		character varying(20) not null, --название элемента тестирования
-	element_description	character varying(250), --описание элемента тестирования
-	PRIMARY KEY (element_id) 
+	description		character varying(250), --описание элемента тестирования
+	PRIMARY KEY (id) 
 );
 
 CREATE TABLE IF NOT EXISTS trequirement --Требования к элементу тестирования
 ( 
-	requirement_id		serial, --id требования к элементу тестирования
-	requirement_description	character varying(250), --описание требования
+	id			serial, --id требования к элементу тестирования
+	description		character varying(250), --описание требования
 	element_id		integer not null, --id элемента тестирования
-	PRIMARY KEY (requirement_id),
-	FOREIGN KEY (element_id) REFERENCES tcl_element (element_id) 
+	PRIMARY KEY (id),
+	FOREIGN KEY (element_id) REFERENCES tcl_element (id) 
 	ON DELETE CASCADE ON UPDATE CASCADE
 );
-
+--drop table ttestcase;
 CREATE TABLE IF NOT EXISTS ttestcase --Тестовый сценарий
 ( 
 	id		serial, --id тестового сценария
@@ -65,60 +65,60 @@ CREATE TABLE IF NOT EXISTS ttestcase --Тестовый сценарий
 	result		character varying(50), --Ожидаемый результат
 	chain_id	integer,
 	testplan_id		integer,
-	element_id		integer/*,
-	PRIMARY KEY (testcase_id),
-	FOREIGN KEY (testcase_chain_id) REFERENCES ttestcase (testcase_id)
+	element_id		integer,
+	PRIMARY KEY (id),
+	FOREIGN KEY (chain_id) REFERENCES ttestcase (id)
 	ON DELETE CASCADE ON UPDATE CASCADE,
-	FOREIGN KEY (testplan_id) REFERENCES ttestplan (testplan_id)
+	FOREIGN KEY (testplan_id) REFERENCES ttestplan (id)
 	ON DELETE CASCADE ON UPDATE CASCADE,
-	FOREIGN KEY (element_id) REFERENCES tcl_element (element_id)
-	ON DELETE CASCADE ON UPDATE CASCADE*/
+	FOREIGN KEY (element_id) REFERENCES tcl_element (id)
+	ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS ttestreport --Отчет о тестировании
 ( 
-	testreport_id			serial, --id отчета о тестировании
-	testreport_author		character varying(50) not null, --Автор
-	testreport_update_date		date not null, --Дата последнего изменения
-	testreport_creation_date	date not null, --Дата создания
-	PRIMARY KEY (testreport_id) 
+	id			serial, --id отчета о тестировании
+	author			character varying(50) not null, --Автор
+	update_date		date not null, --Дата последнего изменения
+	creation_date		date not null, --Дата создания
+	PRIMARY KEY (id) 
 );
 
 CREATE TABLE IF NOT EXISTS ttestcasereport --Отчет о прохождении тестового сценария
 ( 
-	testcasereport_id		serial, --id отчета о прохождении тестового сценрия
-	testcasereport_author		character varying(50) not null, --Автор
-	testcasereport_creation_date	date not null, --Дата создания
-	testcasereport_success		boolean, --Успешность прохождения тестового сценария
+	id				serial, --id отчета о прохождении тестового сценрия
+	author				character varying(50) not null, --Автор
+	creation_date			date not null, --Дата создания
+	success				boolean, --Успешность прохождения тестового сценария
 	testcase_id			integer, --id тестового сценария
 	testreport_id			integer, --id отчета о тестировании
-	PRIMARY KEY (testcasereport_id),
-	FOREIGN KEY (testreport_id) REFERENCES ttestreport (testreport_id)
+	PRIMARY KEY (id),
+	FOREIGN KEY (testreport_id) REFERENCES ttestreport (id)
 	ON DELETE CASCADE ON UPDATE CASCADE,
-	FOREIGN KEY (testcase_id) REFERENCES ttestcase (testcase_id)
+	FOREIGN KEY (testcase_id) REFERENCES ttestcase (id)
 	ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS tresult --Результат тестирования
 ( 
-	result_id		serial, --id результата тестирования
-	result_author		character varying(50) not null, --Автор
-	result_creation_date	date not null, --Дата добавления результата
-	result_description	character varying(250) not null, --Результат тестирования
+	id		serial, --id результата тестирования
+	author		character varying(50) not null, --Автор
+	creation_date	date not null, --Дата добавления результата
+	description	character varying(250) not null, --Результат тестирования
 	testcase_id		integer,
-	PRIMARY KEY (result_id),
-	FOREIGN KEY (testcase_id) REFERENCES ttestcase (testcase_id)
+	PRIMARY KEY (id),
+	FOREIGN KEY (testcase_id) REFERENCES ttestcase (id)
 	ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS tcomment --Комментарий об ошибке
 ( 
-	comment_id		serial, --id комментария об ошибке
-	comment_author		character varying(50) not null, --Автор
-	comment_creation_date	date not null, --Дата добавления комментария
-	error_description	character varying(50) not null, --Описание ошибки
+	id			serial, --id комментария об ошибке
+	author			character varying(50) not null, --Автор
+	creation_date		date not null, --Дата добавления комментария
+	description		character varying(50) not null, --Описание ошибки
 	result_id		integer,
-	PRIMARY KEY (comment_id),
-	FOREIGN KEY (result_id) REFERENCES tresult (result_id)
+	PRIMARY KEY (id),
+	FOREIGN KEY (result_id) REFERENCES tresult (id)
 	ON DELETE CASCADE ON UPDATE CASCADE
 );
