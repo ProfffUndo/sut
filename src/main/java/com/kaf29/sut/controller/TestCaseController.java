@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping ("testcases")
+@RequestMapping ("testcase")
 public class TestCaseController {
 
     private final TestCaseRepo testCaseRepo;
