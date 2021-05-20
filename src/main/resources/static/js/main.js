@@ -1,9 +1,19 @@
+function getIndex(list,id){
+    for (var i=0; i<list.length; i++){
+        if (list[i].id === id){
+            return i;
+        }
+    }
+    return -1;
+}
+
 var testcaseApi = Vue.resource('/testcase{/id}')
 
 Vue.component('testcase-form',{
-    props:['testcases'],
+    props:['testcases','testcaseAttr'],
     data:function() {
         return {
+            id:'',
             author: '',
             update_date: "2021-01-01",
             creation_date: "2021-01-01",
@@ -16,6 +26,21 @@ Vue.component('testcase-form',{
             element_id: 0
         }
         },
+    watch:{
+        testcaseAttr: function(newVal,oldVal){
+                this.id=newVal.id,
+                this.author=newVal.author,
+                this.update_date = newVal.update_date,
+                this.creation_date = newVal.creation_date,
+                this.case_name = newVal.case_name,
+                this.step = newVal.step,
+                this.input_data = newVal.input_data,
+                this.result = newVal.result,
+                this.chain_id = newVal.chain_id,
+                this.testplan_id = newVal.testplan_id,
+                this.element_id = newVal.element_id
+        }
+    },
     template:
     '<div>'+
         '<input type="text" placeholder="Автор" v-model="author"/>'+
@@ -45,9 +70,37 @@ Vue.component('testcase-form',{
                 element_id: this.element_id
             };
 
+            if (this.id){
+                testcaseApi.update({id:this.id}, testcase).then(result =>
+                    result.json().then(data =>{
+                        var index = getIndex(this.testcases,data.id);
+                        this.testcases.splice(index, 1, data);
+                        this.author = '';
+                        this.update_date = "2021-01-01";
+                        this.creation_date= "2021-01-01";
+                        this.case_name = '';
+                        this.step = '';
+                        this.input_data = '';
+                        this.result = '';
+                        this.chain_id = 0;
+                        this.testplan_id = 0;
+                        this.element_id = 0;
+                        this.id='';
+                    })
+                )
+            }
             testcaseApi.save({},testcase).then(result =>
             result.json().then(data=>{
-                this.testcases.push(data);
+                this.author = '';
+                this.update_date = "2021-01-01";
+                this.creation_date= "2021-01-01";
+                this.case_name = '';
+                this.step = '';
+                this.input_data = '';
+                this.result = '';
+                this.chain_id = 0;
+                this.testplan_id = 0;
+                this.element_id = 0
                 })
             )
         }
@@ -55,21 +108,50 @@ Vue.component('testcase-form',{
 })
 
 Vue.component('testcase-row',{
-    props: ['testcase'],
-    template:'<div><i>({{testcase.id}})</i>{{testcase.author}}{{testcase.case_name}}</div>'
+    props: ['testcase','editTestCase','testcases'],
+    template:'<div><i>({{testcase.id}})</i>{{testcase.author}} {{testcase.case_name}}' +
+        '<span style="position: absolute; right: 0">' +
+        '<input type="button" value="Edit" @click="edit" />' +
+        '<input type="button" value="X" @click="del" />' +
+        '</span>' +
+        '</div>',
+    methods :{
+        edit: function (){
+            this.editTestCase(this.testcase)
+        },
+        del: function (){
+            testcaseApi.remove({id:this.testcase.id}).then(result => {
+                if (result.ok){
+                    this.testcases.splice(this.testcases.indexOf(this.testcase), 1)
+                }
+            })
+        }
+    }
 })
 
 Vue.component('testcases-list', {
     props:['testcases'],
-    template:'<div>' +
-        '<testcase-form testcases="testcases"/>'+
-        '<testcase-row v-for="testcase in testcases" :key="testcase.id" :testcase="testcase" /></div>',
+    data: function (){
+        return {
+            testcase: null
+        }
+    },
+    template:'<div style="position: relative; width: 300px">' +
+        '<testcase-form :testcases="testcases" :testcaseAttr="testcase"/>'+
+        '<testcase-row v-for="testcase in testcases" :key="testcase.id" :testcase="testcase" ' +
+        ':editTestCase="editTestCase" :testcases="testcases" /></div>',
+
     created: function (){
         testcaseApi.get().then(result =>
         result.json().then(data=>
             data.forEach(testcase => this.testcases.push(testcase))
             )
         )
+    },
+    methods: {
+        editTestCase: function (testcase) {
+            this.testcase = testcase;
+        }
     }
 });
 
