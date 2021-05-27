@@ -9,6 +9,7 @@ function getIndex(list,id){
 
 var testcaseApi = Vue.resource('/testcase{/id}')
 
+
 Vue.component('testcase-form',{
     props:['testcases','testcaseAttr'],
     data:function() {
@@ -56,28 +57,28 @@ Vue.component('testcase-form',{
         '<input type="button" value="Save" @click="save"/>'+
         '</div>',
     methods:{
-        save:function (){
+        save:function () {
             var testcase = {
-                author:this.author,
+                author: this.author,
                 update_date: this.update_date,
                 creation_date: this.creation_date,
                 case_name: this.case_name,
                 step: this.step,
                 input_data: this.input_data,
-                result:this.result,
+                result: this.result,
                 chain_id: this.chain_id,
                 testplan_id: this.testplan_id,
                 element_id: this.element_id
             };
 
-            if (this.id){
-                testcaseApi.update({id:this.id}, testcase).then(result =>
-                    result.json().then(data =>{
-                        var index = getIndex(this.testcases,data.id);
+            if (this.id) {
+                testcaseApi.update({id: this.id}, testcase).then(result =>
+                    result.json().then(data => {
+                        var index = getIndex(this.testcases, data.id);
                         this.testcases.splice(index, 1, data);
                         this.author = '';
                         this.update_date = "2021-01-01";
-                        this.creation_date= "2021-01-01";
+                        this.creation_date = "2021-01-01";
                         this.case_name = '';
                         this.step = '';
                         this.input_data = '';
@@ -85,24 +86,26 @@ Vue.component('testcase-form',{
                         this.chain_id = 0;
                         this.testplan_id = 0;
                         this.element_id = 0;
-                        this.id='';
+                        this.id = '';
+                    })
+                )
+            } else {
+                testcaseApi.save({}, testcase).then(result =>
+                    result.json().then(data => {
+                        this.author = '';
+                       // if (this.author ==='') alert ("Введите имя автора");
+                        this.update_date = "2021-01-01";
+                        this.creation_date = "2021-01-01";
+                        this.case_name = '';
+                        this.step = '';
+                        this.input_data = '';
+                        this.result = '';
+                        this.chain_id = 0;
+                        this.testplan_id = 0;
+                        this.element_id = 0
                     })
                 )
             }
-            testcaseApi.save({},testcase).then(result =>
-            result.json().then(data=>{
-                this.author = '';
-                this.update_date = "2021-01-01";
-                this.creation_date= "2021-01-01";
-                this.case_name = '';
-                this.step = '';
-                this.input_data = '';
-                this.result = '';
-                this.chain_id = 0;
-                this.testplan_id = 0;
-                this.element_id = 0
-                })
-            )
         }
     }
 })
@@ -154,7 +157,6 @@ Vue.component('testcases-list', {
         }
     }
 });
-
 
 var app = new Vue({
     el: "#app",
