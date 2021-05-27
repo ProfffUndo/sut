@@ -8,6 +8,7 @@ function getIndex(list,id){
 }
 
 var testcaseApi = Vue.resource('/testcase{/id}')
+var testplanApi = Vue.resource('/testplan{/id}')
 
 
 Vue.component('testcase-form',{
@@ -157,6 +158,7 @@ Vue.component('testcases-list', {
         }
     }
 });
+
 
 var app = new Vue({
     el: "#app",
